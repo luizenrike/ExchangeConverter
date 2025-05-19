@@ -1,0 +1,14 @@
+--- COMANDOS PARA INICIALIZAR UM PROJETO EM TYPESCRIPT ---
+
+npm init -y                       => utilizado para iniciar o npm e criar o arquivo package.json
+
+npm install typescript --save-dev => pra instalar o typescript 
+
+npx tsc --init                    => para inicializar o typescript e o tsconfig.json
+
+
+
+--- EXPRESS ---
+
+npm install express
+npm install @types/express --save-dev
