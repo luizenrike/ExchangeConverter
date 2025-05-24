@@ -1,64 +1,56 @@
 import { User } from "../models/User";
 import { Exchange } from "../models/Exchange";
 import { UserDTO } from "../models/DTOs/UserDTO";
+import { PrismaClient } from '@prisma/client';
 
+
+const prisma = new PrismaClient();
 let Users : User[] = [];
 
-export const GetAllUsers  = () :  User[]=> {
-    return Users;
+export const GetAllUsers  = async () :  Promise<User[] | any> => {
+    const usersDB = await prisma.user.findMany();
+    return usersDB;
 }
 
-export const GetUser = (id: number) : User | undefined => {
-    const user = Users.find(u => u.id === id);
-    
-    return user;
+export const GetUser = async (id: number) : Promise<User> => {
+    const user = await prisma.user.findUnique({where: { id }});
+    if (!user)
+        throw new Error('User not found');
+    else 
+        return user;
 }
 
-export const AddUser = (user: UserDTO) : {success: boolean, message: string} => {
+export const AddUser = async (user: UserDTO) : Promise<{message: string, User: User}> =>  {
     try {
-        const newUser : User = {
-            id          : Users.length + 1,
-            name        : user.name,
-            age         : user.age,
-            nacionality : user.nacionality,
-            exchange    : user.exchange
-        };
-
-        Users.push(newUser);
-        return {success: true, message: "user created"};
+        const newUser = await prisma.user.create({
+            data:{
+                name        : user.name,
+                email       : user.email,
+                age         : user.age,
+                nacionality : user.nacionality,
+                exchange    : user.exchange
+            }
+        });
+        return {message: "User created successfully", User: newUser};
     } catch (error) {
-        return {success: false, message: "fail"}; 
+        throw new Error('An error occurred while creating the user');
     }
 }  
 
-export const UpdateUser = (id: number, updateUser: UserDTO) : {success: boolean, message: string} => {
+export const UpdateUser = async (id: number, updateUser: Partial<UserDTO>) : Promise<{message: string}>  => {
     try {
-        const user = Users.find(u => u.id === id);
-
-        if (user){
-            user.name        = updateUser.name;
-            user.nacionality = updateUser.nacionality;
-            user.age         = updateUser.age;
-            user.exchange    = updateUser.exchange;
-            return {success: true, message: "user updated"};
-        }else{
-            return {success: false, message: "user not found"}
-        }
+        await prisma.user.update({where : {id}, data: updateUser});
+        return {message: 'user updated successfully'};
     } catch (error) {
-        return {success: false, message: "fail update user"};
+        throw new Error('An error occurred while update the user')
     }
 }
 
-export const DeleteUser = (id: number) : {success: boolean, message: string} => {
+export const DeleteUser = async (id: number) : Promise<{message: string}> => {
     try {
-        const userIndex = Users.findIndex(u => u.id === id);
-
-        if (userIndex !== -1){
-            Users.splice(userIndex, 1);
-            return {success: true, message: "user deleted"};
-        }else
-            return {success: false, message: "user not found"}
+        await prisma.user.delete({where : {id}});
+        return {message: 'User deleted successfully'};
     } catch (error) {
-        return {success: false, message: "fail update user"};
+        throw new Error('An error occurred while delete the user');
     }
 }
