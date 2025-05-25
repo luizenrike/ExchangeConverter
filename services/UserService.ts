@@ -1,11 +1,14 @@
+//////////////////////////////////////////////////
+//     Created: Luiz Henrique
+// Description: Manages queries on the users table
+//////////////////////////////////////////////////
+
 import { User } from "../models/User";
 import { Exchange } from "../models/Exchange";
 import { UserDTO } from "../models/DTOs/UserDTO";
 import { PrismaClient } from '@prisma/client';
 
-
 const prisma = new PrismaClient();
-let Users : User[] = [];
 
 export const GetAllUsers  = async () :  Promise<User[] | any> => {
     const usersDB = await prisma.user.findMany();
